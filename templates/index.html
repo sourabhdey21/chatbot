@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Chat Bot</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .chat-container {
+            height: 60vh;
+            max-height: 60vh;
+        }
+        .message {
+            max-width: 70%;
+            margin: 10px 0;
+            padding: 16px 20px;
+            border-radius: 18px;
+            word-break: break-word;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+        .user-message {
+            background: linear-gradient(90deg, #c3eafe 0%, #e0e7ff 100%);
+            margin-left: auto;
+            color: #1e293b;
+            border-bottom-right-radius: 4px;
+        }
+        .bot-message {
+            background: linear-gradient(90deg, #f3f4f6 0%, #fef9c3 100%);
+            margin-right: auto;
+            color: #334155;
+            border-bottom-left-radius: 4px;
+        }
+        .typing-indicator {
+            display: none;
+        }
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: #666;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1s infinite;
+        }
+        @keyframes typing {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+        .markdown-content ul { list-style: disc; margin-left: 1.5em; }
+        .markdown-content ol { list-style: decimal; margin-left: 1.5em; }
+        .markdown-content pre { background: #f3f4f6; padding: 8px; border-radius: 8px; overflow-x: auto; }
+        .markdown-content code { background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+            <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">🤖 Gemini Chat Bot</h1>
+            
+            <div id="chat-messages" class="chat-container overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg">
+                <div class="message bot-message markdown-content" id="welcome-message">
+                    Hello! I'm your Gemini AI assistant. How can I help you today?
+                </div>
+            </div>
+
+            <div class="typing-indicator mb-4 text-center">
+                <span></span>
+                <span style="animation-delay: 0.2s"></span>
+                <span style="animation-delay: 0.4s"></span>
+            </div>
+
+            <form id="chat-form" class="flex gap-2">
+                <input type="text" id="user-input" 
+                       class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                       placeholder="Type your message here..." required autocomplete="off">
+                <button type="submit" 
+                        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const typingIndicator = document.querySelector('.typing-indicator');
+        const welcomeMessage = document.getElementById('welcome-message');
+
+        // Add a message to the chat
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            if (isUser) {
+                messageDiv.textContent = message;
+            } else {
+                messageDiv.classList.add('markdown-content');
+                messageDiv.innerHTML = marked.parse(message);
+            }
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return messageDiv;
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Remove welcome message if present
+            if (welcomeMessage) welcomeMessage.remove();
+
+            // Add user message
+            addMessage(message, true);
+            userInput.value = '';
+
+            // Add bot message placeholder
+            const botDiv = addMessage('', false);
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+
+                if (!response.body) throw new Error('No response body');
+                const reader = response.body.getReader();
+                let botText = '';
+                let decoder = new TextDecoder();
+
+                // Read the stream chunk by chunk
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value, { stream: true });
+                    botText += chunk;
+                    botDiv.innerHTML = marked.parse(botText);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+                hideTypingIndicator();
+            } catch (error) {
+                hideTypingIndicator();
+                botDiv.textContent = 'Sorry, there was an error connecting to the server.';
+            }
+        });
+    </script>
+</body>
+</html> 
