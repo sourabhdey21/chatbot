@@ -7,6 +7,52 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        body {
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+            min-height: 100vh;
+        }
+        .chat-widget-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .chat-widget {
+            width: 370px;
+            max-width: 95vw;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            border-radius: 1rem;
+            overflow: hidden;
+            background: #fff;
+            margin-bottom: 12px;
+            display: none;
+            flex-direction: column;
+            transition: box-shadow 0.2s;
+        }
+        .chat-widget.open {
+            display: flex;
+        }
+        .chat-toggle-btn {
+            background: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .chat-toggle-btn:hover {
+            background: linear-gradient(90deg, #1d4ed8 0%, #0ea5e9 100%);
+        }
         .chat-container {
             height: 60vh;
             max-height: 60vh;
@@ -56,40 +102,96 @@
     </style>
 </head>
 <body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-            <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">🤖 Gemini Chat Bot</h1>
-            
-            <div id="chat-messages" class="chat-container overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg">
-                <div class="message bot-message markdown-content" id="welcome-message">
-                    Hello! I'm your Gemini AI assistant. How can I help you today?
-                </div>
+    <!-- Hero Section -->
+    <div class="flex flex-col items-center justify-center min-h-screen text-center select-none">
+        <div class="mb-8">
+            <div class="flex justify-center mb-4">
+                <span class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-blue-100">
+                    <svg width="56" height="56" fill="none" viewBox="0 0 56 56"><rect width="56" height="56" rx="28" fill="#2563eb"/><text x="50%" y="54%" text-anchor="middle" fill="#fff" font-size="32" font-family="Arial, sans-serif" dy=".3em">🤖</text></svg>
+                </span>
             </div>
-
-            <div class="typing-indicator mb-4 text-center">
-                <span></span>
-                <span style="animation-delay: 0.2s"></span>
-                <span style="animation-delay: 0.4s"></span>
+            <h1 class="text-4xl font-extrabold text-blue-700 mb-2">Welcome to Gemini Chat Bot</h1>
+            <p class="text-lg text-gray-600 max-w-xl mx-auto">Your smart AI assistant, always ready to help! Click the chat bubble in the bottom-right corner to start a conversation. Ask anything—get instant, friendly answers.</p>
+        </div>
+        <div class="flex flex-col items-center space-y-2 mt-4">
+            <div class="flex items-center space-x-2">
+                <span class="text-blue-500 text-xl">💡</span>
+                <span class="text-gray-700">24/7 instant answers</span>
             </div>
-
-            <form id="chat-form" class="flex gap-2">
-                <input type="text" id="user-input" 
-                       class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                       placeholder="Type your message here..." required autocomplete="off">
-                <button type="submit" 
-                        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                    Send
-                </button>
-            </form>
+            <div class="flex items-center space-x-2">
+                <span class="text-blue-500 text-xl">🔒</span>
+                <span class="text-gray-700">Private & secure</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-blue-500 text-xl">✨</span>
+                <span class="text-gray-700">Powered by Google Gemini AI</span>
+            </div>
+        </div>
+        <!-- Buy Me a Coffee Section -->
+        <div class="mt-10 flex flex-col items-center">
+            <a href="https://www.buymeacoffee.com/yourusername" target="_blank" rel="noopener" class="inline-flex items-center px-5 py-3 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold rounded-lg shadow transition-colors duration-200">
+                <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee" class="w-7 h-7 mr-2"/>
+                Buy me a coffee
+            </a>
+            <span class="text-xs text-gray-400 mt-2">Support the developer ❤️</span>
         </div>
     </div>
-
+    <!-- Chat Widget -->
+    <div class="chat-widget-container">
+        <div class="chat-widget" id="chat-widget">
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+                <div class="flex justify-between items-center mb-2">
+                    <h1 class="text-2xl font-bold text-blue-600">🤖 Gemini Chat Bot</h1>
+                    <button id="minimize-btn" title="Minimize" class="text-gray-400 hover:text-blue-600 text-2xl font-bold">&minus;</button>
+                </div>
+                <div id="chat-messages" class="chat-container overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="message bot-message markdown-content" id="welcome-message">
+                        Hello! I'm your Gemini AI assistant. How can I help you today?
+                    </div>
+                </div>
+                <div class="typing-indicator mb-4 text-center">
+                    <span></span>
+                    <span style="animation-delay: 0.2s"></span>
+                    <span style="animation-delay: 0.4s"></span>
+                </div>
+                <form id="chat-form" class="flex gap-2">
+                    <input type="text" id="user-input" 
+                        class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        placeholder="Type your message here..." required autocomplete="off">
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </div>
+        <button class="chat-toggle-btn" id="chat-toggle-btn" title="Open Gemini Bot">
+            <span id="chat-toggle-icon">💬</span>
+        </button>
+    </div>
     <script>
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const chatMessages = document.getElementById('chat-messages');
         const typingIndicator = document.querySelector('.typing-indicator');
         const welcomeMessage = document.getElementById('welcome-message');
+        const chatWidget = document.getElementById('chat-widget');
+        const chatToggleBtn = document.getElementById('chat-toggle-btn');
+        const minimizeBtn = document.getElementById('minimize-btn');
+        const chatToggleIcon = document.getElementById('chat-toggle-icon');
+
+        // Widget open/close logic
+        function openChat() {
+            chatWidget.classList.add('open');
+            chatToggleBtn.style.display = 'none';
+            setTimeout(() => { userInput.focus(); }, 200);
+        }
+        function closeChat() {
+            chatWidget.classList.remove('open');
+            chatToggleBtn.style.display = 'flex';
+        }
+        chatToggleBtn.onclick = openChat;
+        minimizeBtn.onclick = closeChat;
 
         // Add a message to the chat
         function addMessage(message, isUser = false) {
