@@ -318,6 +318,69 @@
             } else {
                 messageDiv.classList.add('markdown-content');
                 messageDiv.innerHTML = marked.parse(message);
+                // Add action bar for bot messages
+                const actionBar = document.createElement('div');
+                actionBar.className = 'flex gap-3 mt-2 items-center';
+                // Copy button
+                const copyBtn = document.createElement('button');
+                copyBtn.title = 'Copy';
+                copyBtn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke="#ccc"/><rect x="3" y="3" width="13" height="13" rx="2" stroke="#ccc"/></svg>`;
+                copyBtn.className = 'hover:text-blue-500';
+                copyBtn.onclick = () => {
+                    // Copy plain text (strip HTML)
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = message;
+                    const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                    navigator.clipboard.writeText(plainText).then(() => {
+                        copyBtn.innerHTML = '✅';
+                        setTimeout(() => copyBtn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke="#ccc"/><rect x="3" y="3" width="13" height="13" rx="2" stroke="#ccc"/></svg>`, 1000);
+                    });
+                };
+                // Like/Dislike buttons
+                const likeBtn = document.createElement('button');
+                likeBtn.title = 'Like';
+                likeBtn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10" stroke="#ccc"/><path d="M12 2l4 8H8l4-8z" stroke="#ccc"/></svg>`;
+                likeBtn.className = 'hover:text-green-500';
+                const dislikeBtn = document.createElement('button');
+                dislikeBtn.title = 'Dislike';
+                dislikeBtn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 14V4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v10" stroke="#ccc"/><path d="M12 22l-4-8h8l-4 8z" stroke="#ccc"/></svg>`;
+                dislikeBtn.className = 'hover:text-red-500';
+                likeBtn.onclick = () => {
+                    likeBtn.classList.toggle('text-green-500');
+                    if (likeBtn.classList.contains('text-green-500')) {
+                        dislikeBtn.classList.remove('text-red-500');
+                    }
+                };
+                dislikeBtn.onclick = () => {
+                    dislikeBtn.classList.toggle('text-red-500');
+                    if (dislikeBtn.classList.contains('text-red-500')) {
+                        likeBtn.classList.remove('text-green-500');
+                    }
+                };
+                // Audio button
+                const audioBtn = document.createElement('button');
+                audioBtn.title = 'Listen';
+                audioBtn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" stroke="#ccc"/><path d="M16 9a4 4 0 0 1 0 6" stroke="#ccc"/><path d="M19 5a9 9 0 0 1 0 14" stroke="#ccc"/></svg>`;
+                audioBtn.className = 'hover:text-yellow-500';
+                let utterance = null;
+                audioBtn.onclick = () => {
+                    // Stop any current speech
+                    window.speechSynthesis.cancel();
+                    // Get plain text (strip HTML)
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = message;
+                    const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                    utterance = new SpeechSynthesisUtterance(plainText);
+                    utterance.onstart = () => audioBtn.classList.add('text-yellow-500');
+                    utterance.onend = () => audioBtn.classList.remove('text-yellow-500');
+                    utterance.onerror = () => audioBtn.classList.remove('text-yellow-500');
+                    window.speechSynthesis.speak(utterance);
+                };
+                actionBar.appendChild(copyBtn);
+                actionBar.appendChild(likeBtn);
+                actionBar.appendChild(dislikeBtn);
+                actionBar.appendChild(audioBtn);
+                messageDiv.appendChild(actionBar);
             }
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
