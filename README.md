@@ -1,5 +1,7 @@
 # Gemini Chat Bot
 
+![Dashboard](screenshots/dashboard.png)
+
 A modern web-based chat interface for interacting with Google's Gemini AI model.
 
 ## Features
