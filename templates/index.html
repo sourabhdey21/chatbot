@@ -8,8 +8,21 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body {
-            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+            background: url('https://www.transparenttextures.com/patterns/cubes.png'),
+                url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80');
+            background-size: auto, cover;
+            background-repeat: repeat, no-repeat;
+            background-position: top left, center center;
             min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .dark-theme body {
+            background: url('https://www.transparenttextures.com/patterns/cubes.png'),
+                url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1500&q=80');
+            background-size: auto, cover;
+            background-repeat: repeat, no-repeat;
+            background-position: top left, center center;
+            color: #e5e7eb;
         }
         .chat-widget-container {
             position: fixed;
@@ -30,7 +43,7 @@
             margin-bottom: 12px;
             display: none;
             flex-direction: column;
-            transition: box-shadow 0.2s, width 0.3s, height 0.3s, border-radius 0.3s, top 0.3s, left 0.3s, right 0.3s, bottom 0.3s;
+            transition: box-shadow 0.2s, width 0.3s, height 0.3s, border-radius 0.3s, top 0.3s, left 0.3s, right 0.3s, bottom 0.3s, background 0.3s;
         }
         .chat-widget.open {
             display: flex;
@@ -52,6 +65,10 @@
         .chat-widget.fullscreen .chat-container {
             height: calc(100vh - 180px);
             max-height: calc(100vh - 180px);
+        }
+        .dark-theme .chat-widget {
+            background: #18181b;
+            color: #e5e7eb;
         }
         .chat-toggle-btn {
             background: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
@@ -96,6 +113,14 @@
             color: #334155;
             border-bottom-left-radius: 4px;
         }
+        .dark-theme .user-message {
+            background: linear-gradient(90deg, #23272f 0%, #334155 100%);
+            color: #e5e7eb;
+        }
+        .dark-theme .bot-message {
+            background: linear-gradient(90deg, #23272f 0%, #3b3b3b 100%);
+            color: #facc15;
+        }
         .typing-indicator {
             display: none;
         }
@@ -108,6 +133,9 @@
             margin: 0 2px;
             animation: typing 1s infinite;
         }
+        .dark-theme .typing-indicator span {
+            background-color: #facc15;
+        }
         @keyframes typing {
             0% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
@@ -117,32 +145,90 @@
         .markdown-content ol { list-style: decimal; margin-left: 1.5em; }
         .markdown-content pre { background: #f3f4f6; padding: 8px; border-radius: 8px; overflow-x: auto; }
         .markdown-content code { background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
+        .dark-theme .markdown-content pre, .dark-theme .markdown-content code {
+            background: #23272f;
+            color: #facc15;
+        }
+        .dark-theme .markdown-content {
+            color: #e5e7eb;
+        }
+        /* Hero section dark mode */
+        .dark-theme .select-none, .dark-theme .text-gray-600, .dark-theme .text-gray-700, .dark-theme .text-gray-400 {
+            color: #e5e7eb !important;
+        }
+        .dark-theme .bg-blue-100 {
+            background-color: #23272f !important;
+        }
+        .dark-theme .bg-yellow-400 {
+            background-color: #facc15 !important;
+        }
+        .dark-theme .hover\:bg-yellow-300:hover {
+            background-color: #fde047 !important;
+        }
+        .hero-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(24, 24, 27, 0.55);
+            z-index: 0;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        .hero-title {
+            color: #fff;
+            text-shadow: 0 2px 16px #000, 0 1px 0 #333;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .hero-subtitle, .hero-feature {
+            color: #f3f4f6;
+            text-shadow: 0 1px 8px #000, 0 1px 0 #333;
+        }
+        .hero-feature-icon {
+            filter: drop-shadow(0 1px 4px #000);
+        }
+        .dark-theme .hero-overlay {
+            background: rgba(24, 24, 27, 0.75);
+        }
+        .dark-theme .hero-title {
+            color: #facc15;
+            text-shadow: 0 2px 16px #000, 0 1px 0 #333;
+        }
+        .dark-theme .hero-subtitle, .dark-theme .hero-feature {
+            color: #fff;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
+    <!-- Hero Overlay -->
+    <div class="hero-overlay"></div>
     <!-- Hero Section -->
-    <div class="flex flex-col items-center justify-center min-h-screen text-center select-none">
+    <div class="flex flex-col items-center justify-center min-h-screen text-center select-none hero-content">
         <div class="mb-8">
             <div class="flex justify-center mb-4">
                 <span class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-blue-100">
                     <svg width="56" height="56" fill="none" viewBox="0 0 56 56"><rect width="56" height="56" rx="28" fill="#2563eb"/><text x="50%" y="54%" text-anchor="middle" fill="#fff" font-size="32" font-family="Arial, sans-serif" dy=".3em">🤖</text></svg>
                 </span>
             </div>
-            <h1 class="text-4xl font-extrabold text-blue-700 mb-2">Welcome to Gemini Chat Bot</h1>
-            <p class="text-lg text-gray-600 max-w-xl mx-auto">Your smart AI assistant, always ready to help! Click the chat bubble in the bottom-right corner to start a conversation. Ask anything—get instant, friendly answers.</p>
+            <h1 class="text-4xl font-extrabold mb-2 hero-title">Welcome to Gemini Chat Bot</h1>
+            <p class="text-lg max-w-xl mx-auto hero-subtitle">Your smart AI assistant, always ready to help! Click the chat bubble in the bottom-right corner to start a conversation. Ask anything—get instant, friendly answers.</p>
         </div>
         <div class="flex flex-col items-center space-y-2 mt-4">
-            <div class="flex items-center space-x-2">
-                <span class="text-blue-500 text-xl">💡</span>
-                <span class="text-gray-700">24/7 instant answers</span>
+            <div class="flex items-center space-x-2 hero-feature">
+                <span class="text-yellow-300 text-xl hero-feature-icon">💡</span>
+                <span>24/7 instant answers</span>
             </div>
-            <div class="flex items-center space-x-2">
-                <span class="text-blue-500 text-xl">🔒</span>
-                <span class="text-gray-700">Private & secure</span>
+            <div class="flex items-center space-x-2 hero-feature">
+                <span class="text-yellow-300 text-xl hero-feature-icon">🔒</span>
+                <span>Private & secure</span>
             </div>
-            <div class="flex items-center space-x-2">
-                <span class="text-blue-500 text-xl">✨</span>
-                <span class="text-gray-700">Powered by Google Gemini AI</span>
+            <div class="flex items-center space-x-2 hero-feature">
+                <span class="text-yellow-300 text-xl hero-feature-icon">✨</span>
+                <span>Powered by Google Gemini AI</span>
             </div>
         </div>
         <!-- Buy Me a Coffee Section -->
@@ -151,7 +237,7 @@
                 <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee" class="w-7 h-7 mr-2"/>
                 Buy me a coffee
             </a>
-            <span class="text-xs text-gray-400 mt-2">Support the developer ❤️</span>
+            <span class="text-xs text-gray-200 mt-2">Support the developer ❤️</span>
         </div>
     </div>
     <!-- Chat Widget -->
@@ -161,6 +247,7 @@
                 <div class="flex justify-between items-center mb-2">
                     <h1 class="text-2xl font-bold text-blue-600">🤖 Gemini Chat Bot</h1>
                     <div class="flex items-center gap-2">
+                        <button id="theme-btn" title="Toggle Theme" class="text-gray-400 hover:text-blue-600 text-2xl font-bold" style="margin-right: 0.25rem;">🌙</button>
                         <button id="fullscreen-btn" title="Full Screen" class="text-gray-400 hover:text-blue-600 text-2xl font-bold" style="margin-right: 0.25rem;">⛶</button>
                         <button id="minimize-btn" title="Minimize" class="text-gray-400 hover:text-blue-600 text-2xl font-bold">&minus;</button>
                     </div>
@@ -200,7 +287,30 @@
         const chatToggleBtn = document.getElementById('chat-toggle-btn');
         const minimizeBtn = document.getElementById('minimize-btn');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const themeBtn = document.getElementById('theme-btn');
         const chatToggleIcon = document.getElementById('chat-toggle-icon');
+        const htmlRoot = document.documentElement;
+
+        // Theme logic
+        function setTheme(dark) {
+            if (dark) {
+                htmlRoot.classList.add('dark-theme');
+                themeBtn.innerText = '☀️';
+                localStorage.setItem('gemini_theme', 'dark');
+            } else {
+                htmlRoot.classList.remove('dark-theme');
+                themeBtn.innerText = '🌙';
+                localStorage.setItem('gemini_theme', 'light');
+            }
+        }
+        // On load, set theme from localStorage
+        (function() {
+            const saved = localStorage.getItem('gemini_theme');
+            setTheme(saved === 'dark');
+        })();
+        themeBtn.onclick = function() {
+            setTheme(!htmlRoot.classList.contains('dark-theme'));
+        };
 
         // Widget open/close logic
         function openChat() {
