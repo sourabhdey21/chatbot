@@ -15,17 +15,23 @@ A modern web-based chat interface for interacting with Google's Gemini AI model.
 
 ## Setup
 
-1. Install the required dependencies:
+1. **Create a `.env` file in your project root with your Gemini API key:**
+
+```
+GEMINI_API_KEY=your_actual_gemini_api_key_here
+```
+
+2. Install the required dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Run the web application:
+3. Run the web application:
 ```bash
 python app.py
 ```
 
-3. Open your browser and navigate to:
+4. Open your browser and navigate to:
 ```
 http://localhost:8000
 ```
