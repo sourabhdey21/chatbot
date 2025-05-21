@@ -253,9 +253,7 @@
                     </div>
                 </div>
                 <div id="chat-messages" class="chat-container overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg">
-                    <div class="message bot-message markdown-content" id="welcome-message">
-                        Hello! I'm your Gemini AI assistant. How can I help you today?
-                    </div>
+                    <!-- Messages will be rendered here -->
                 </div>
                 <div class="typing-indicator mb-4 text-center">
                     <span></span>
@@ -282,7 +280,6 @@
         const userInput = document.getElementById('user-input');
         const chatMessages = document.getElementById('chat-messages');
         const typingIndicator = document.querySelector('.typing-indicator');
-        const welcomeMessage = document.getElementById('welcome-message');
         const chatWidget = document.getElementById('chat-widget');
         const chatToggleBtn = document.getElementById('chat-toggle-btn');
         const minimizeBtn = document.getElementById('minimize-btn');
@@ -290,6 +287,59 @@
         const themeBtn = document.getElementById('theme-btn');
         const chatToggleIcon = document.getElementById('chat-toggle-icon');
         const htmlRoot = document.documentElement;
+        const LS_KEY = 'gemini_chat_history';
+
+        // Persistent chat history functions
+        function loadHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(LS_KEY)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+        function saveHistory(history) {
+            localStorage.setItem(LS_KEY, JSON.stringify(history));
+        }
+        function renderHistory(history) {
+            chatMessages.innerHTML = '';
+            if (history.length === 0) {
+                addMessage("Hello! I'm your Gemini AI assistant. How can I help you today?", false, false);
+            } else {
+                history.forEach(msg => addMessage(msg.content, msg.role === 'user', false));
+            }
+        }
+
+        // Add a message to the chat and optionally to history
+        function addMessage(message, isUser = false, save = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            if (isUser) {
+                messageDiv.textContent = message;
+            } else {
+                messageDiv.classList.add('markdown-content');
+                messageDiv.innerHTML = marked.parse(message);
+            }
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (save) {
+                const history = loadHistory();
+                history.push({ role: isUser ? 'user' : 'bot', content: message });
+                saveHistory(history);
+            }
+            return messageDiv;
+        }
+
+        // On page load, render chat history
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory(loadHistory());
+        });
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+        }
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
 
         // Theme logic
         function setTheme(dark) {
@@ -338,36 +388,10 @@
             }
         };
 
-        // Add a message to the chat
-        function addMessage(message, isUser = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            if (isUser) {
-                messageDiv.textContent = message;
-            } else {
-                messageDiv.classList.add('markdown-content');
-                messageDiv.innerHTML = marked.parse(message);
-            }
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            return messageDiv;
-        }
-
-        function showTypingIndicator() {
-            typingIndicator.style.display = 'block';
-        }
-
-        function hideTypingIndicator() {
-            typingIndicator.style.display = 'none';
-        }
-
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const message = userInput.value.trim();
             if (!message) return;
-
-            // Remove welcome message if present
-            if (welcomeMessage) welcomeMessage.remove();
 
             // Add user message
             addMessage(message, true);
@@ -402,6 +426,10 @@
                     botDiv.innerHTML = marked.parse(botText);
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
+                // Save bot message to history
+                const history = loadHistory();
+                history.push({ role: 'bot', content: botText });
+                saveHistory(history);
                 hideTypingIndicator();
             } catch (error) {
                 hideTypingIndicator();
