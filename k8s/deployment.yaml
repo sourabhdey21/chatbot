@@ -16,6 +16,7 @@ spec:
       containers:
       - name: geminibot
         image: sourabhdey21700/geminichatbot:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         resources:
