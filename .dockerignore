@@ -1,0 +1,39 @@
+# Version control
+.git
+.gitignore
+
+# Python virtual environment
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Local development
+
+.env.local
+.env.*.local
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Screenshots
+screenshots/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore 

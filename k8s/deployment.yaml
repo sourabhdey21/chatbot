@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geminibot-deployment
+  namespace: geminibot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: geminibot
+  template:
+    metadata:
+      labels:
+        app: geminibot
+    spec:
+      containers:
+      - name: geminibot
+        image: sourabhdey21700/geminichatbot:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        env:
+        - name: NODE_ENV
+          value: "production"
